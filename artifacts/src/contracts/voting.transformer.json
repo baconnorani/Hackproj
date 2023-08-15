@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "errors": [],
+  "scryptfile": "src/contracts/voting.scrypt",
+  "sourceMapFile": "src/contracts/voting.scrypt.map",
+  "ctxMethods": [
+    "vote"
+  ]
+}

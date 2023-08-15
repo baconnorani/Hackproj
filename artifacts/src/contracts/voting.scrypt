@@ -1,0 +1,36 @@
+
+struct Candidate {
+  bytes name;
+  int votesReceived;
+}
+
+contract Voting {
+  @state Candidate[2] candidates;
+  constructor(bytes[2] names) {
+    this.candidates = repeat({b'', 0}, 2);
+    loop (2) : i {
+        this.candidates[i] = {names[i], 0};
+      }
+  }
+  public function vote(bytes name, SigHashPreimage __scrypt_ts_txPreimage, int __scrypt_ts_changeAmount, Ripemd160 __scrypt_ts_changeAddress) {
+    require(Tx.checkPreimageSigHashType(__scrypt_ts_txPreimage, SigHashType(b'41')));
+    this.increaseVotesReceived(name);
+    bytes outputs = this.buildStateOutput(SigHash.value(__scrypt_ts_txPreimage));
+    if(__scrypt_ts_changeAmount > 0) {
+        outputs += (__scrypt_ts_changeAmount > 0 ? Utils.buildOutput(Utils.buildPublicKeyHashScript(__scrypt_ts_changeAddress), __scrypt_ts_changeAmount) : b'');
+      }
+    require(SigHash.hashOutputs(__scrypt_ts_txPreimage) == hash256(outputs));
+  }
+  function increaseVotesReceived(bytes name) : bool {
+    loop (2) : i {
+        if(this.candidates[i].name == name) {
+          this.candidates[i].votesReceived++;
+        }
+      }
+    return true;
+  }
+    function buildStateOutput(int amount): bytes {
+      bytes script = this.getStateScript();
+      return Utils.buildOutput(script, amount);
+    }
+}
